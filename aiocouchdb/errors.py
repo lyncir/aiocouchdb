@@ -30,7 +30,7 @@ Exception hierarchy
 
 
 import asyncio
-import aiohttp.errors
+import aiohttp
 
 
 __all__ = (
@@ -48,7 +48,7 @@ __all__ = (
 )
 
 
-class HttpErrorException(aiohttp.errors.HttpProcessingError):
+class HttpErrorException(aiohttp.ClientError):
     """Extension of :exc:`aiohttp.errors.HttpErrorException` for CouchDB related
     errors."""
 
