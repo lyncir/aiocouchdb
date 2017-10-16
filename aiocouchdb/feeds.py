@@ -103,7 +103,7 @@ class Feed(object):
                            the details
         """
         self._active = False
-        self._resp.close(force=force)
+        self._resp.close()
         # put stop signal into queue to break waiting loop on queue.get()
         self._queue.put_nowait(None)
 

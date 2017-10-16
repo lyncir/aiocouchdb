@@ -14,6 +14,7 @@ import io
 import json
 import types
 import urllib.parse
+from yarl import URL
 
 from .authn import AuthProvider, NoAuthProvider
 from .errors import maybe_raise_error
@@ -110,13 +111,12 @@ def request(method, url, *,
     connector = connector or aiohttp.TCPConnector(force_close=True, loop=loop)
     request_class = request_class or HttpRequest
     response_class = response_class or HttpResponse
-
+    realURL = URL(url)
     while True:
-        req = request_class(method, url,
+        req = request_class(method, realURL,
                             compress=compress,
                             cookies=cookies,
                             data=data,
-                            encoding=encoding,
                             expect100=expect100,
                             headers=headers,
                             loop=loop,
@@ -126,14 +126,14 @@ def request(method, url, *,
 
         conn = yield from connector.connect(req)
         try:
-            resp = req.send(conn.writer, conn.reader)
+            resp = req.send(conn)
             try:
                 yield from resp.start(conn, read_until_eof)
             except:
                 resp.close()
                 conn.close()
                 raise
-        except (aiohttp.HttpProcessingError,
+        except (aiohttp.ClientResponseError,
                 aiohttp.ServerDisconnectedError) as exc:
             raise aiohttp.ClientResponseError() from exc
         except OSError as exc:
