@@ -292,6 +292,20 @@ class Database(object):
         return (yield from resp.json())
 
     @asyncio.coroutine
+    def create_doc(self, data, *, auth=None):
+        """Creates a new document in the database given a JSON or JSON string.
+        
+        :param JSON data: The new document to be passed.  Can also be a JSON string
+        :param auth: :class:`aiocouchdb.authn.AuthProvider` instance
+        """
+        if type(data) == str:
+            data = json.loads(data)
+        headers = {'Accept' : 'application/json', 'Content-Type':'application/json'}
+        self.resource.url = self.resource.url.replace('localhost','127.0.0.1')
+        resp = yield from self.resource.post(auth=auth, data=data, headers=headers) #??
+        return resp
+
+    @asyncio.coroutine
     def changes(self, *doc_ids,
                 auth=None,
                 feed_buffer_size=None,

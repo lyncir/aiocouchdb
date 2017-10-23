@@ -458,7 +458,6 @@ class Resource(object):
         :returns: :class:`aiocouchdb.client.HttpResponse` instance
         """
         url = urljoin(self.url, path) if path else self.url
-
         return self.session.request(method, url,
                                     auth=auth,
                                     data=data,

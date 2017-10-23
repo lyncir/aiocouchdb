@@ -44,7 +44,7 @@ class Document(object):
                  loop=None):
         if attachment_class is not None:
             self.attachment_class = attachment_class
-        if isinstance(url_or_resource, str):
+        if isinstance(url_or_resource, str) and len(url_or_resource) != 0:
             url_or_resource = Resource(url_or_resource, loop=loop)
         self.resource = url_or_resource
         self._docid = docid
@@ -404,6 +404,7 @@ class Document(object):
                                                 params=params)
         yield from resp.maybe_raise_error()
         return (yield from resp.json())
+
 
     @asyncio.coroutine
     def delete(self, rev, *, auth=None, preserve_content=None):
