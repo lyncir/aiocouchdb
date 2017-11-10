@@ -6,6 +6,9 @@ aiocouchdb
 :documentation: http://aiocouchdb.readthedocs.org/en/latest/
 :license: BSD
 
+**Installation**
+pip install git+git://github.com/Tarokan/aiocouchdb 
+
 CouchDB client built on top of `aiohttp`_ and made for `asyncio`_.
 
 Current status: **beta**. `aiocouchdb` has all CouchDB API implements up to
