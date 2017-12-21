@@ -26,8 +26,6 @@ AIOCouchDb now supports a create_doc() method that can be called on a database i
 - Stream-like handling views, changes feeds and bulk docs upload
 
 Requirements
-
-Requirements
 ============
 
 - Python 3.3+
