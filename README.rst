@@ -16,7 +16,7 @@ Current status: **beta**. `aiocouchdb` has all CouchDB API implements up to
 work is in progress. Feel free to `send pull request`_ or `open issue`_ if
 you'd found something that should be fixed.
 
-**Feature**
+**Features**
 
 aiocouchdb now supports a create_doc() method that can be called on a database instance, which takes in a JSON or JSON string, and additional optional parameters.
 
