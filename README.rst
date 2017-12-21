@@ -16,7 +16,8 @@ Current status: **beta**. `aiocouchdb` has all CouchDB API implements up to
 work is in progress. Feel free to `send pull request`_ or `open issue`_ if
 you'd found something that should be fixed.
 
-Features:
+**Feature**
+AIOCouchDb now supports a create_doc() method that can be called on a database instance, which takes in a JSON or JSON string, and additional optional parameters.
 
 - Modern CouchDB client for Python 3.3+ based on `aiohttp`_
 - Complete CouchDB API support (JSON and Multipart) up to 1.6.1 version
@@ -24,22 +25,13 @@ Features:
 - Stateless behavior
 - Stream-like handling views, changes feeds and bulk docs upload
 
-Roadmap (not exactly in that order):
-
-- Cloudant support
-- CouchDB 2.0 support
-- ElasticSearch CouchDB river support
-- GeoCouch support
-- Microframework for OS daemons and external handlers
-- Native integration with Python Query Server
-- Replicator-as-a-Library / Replicator-as-a-Service
-- Stateful API
+Requirements
 
 Requirements
 ============
 
 - Python 3.3+
-- `aiohttp`_
+- `aiohttp`_ 2.2.5 only
 - `oauthlib`_ (optional)
 
 .. _aiohttp: https://github.com/KeepSafe/aiohttp
