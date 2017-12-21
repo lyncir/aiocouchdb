@@ -41,8 +41,8 @@ setup(
     description='CouchDB client built on top of aiohttp (asyncio)',
     long_description=long_description,
 
-    author='Alexander Shorin',
-    author_email='kxepal@gmail.com',
+    author='Nicholas Leung, Alexander Shorin',
+    author_email='leung5326@gmail.com, kxepal@gmail.com',
 
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -52,7 +52,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Database :: Front-Ends',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
@@ -62,7 +62,7 @@ setup(
     zip_safe=False,
 
     install_requires=[
-        'aiohttp==0.17.4'
+        'aiohttp==2.2.5'
     ],
     extras_require={
         'oauth': [
