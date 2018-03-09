@@ -12,7 +12,9 @@ pip install git+git://github.com/Tarokan/aiocouchdb
 CouchDB client built on top of `aiohttp`_ and made for `asyncio`_.
 
 Current status: **beta**. `aiocouchdb` has all CouchDB API implements up to
-1.6.1 release. However, it may lack of some usability and stability bits, but
+1.6.1 release, and the ability to use Mongo Queries.
+
+However, it may lack of some usability and stability bits, but
 work is in progress. Feel free to `send pull request`_ or `open issue`_ if
 you'd found something that should be fixed.
 

@@ -502,6 +502,13 @@ class Database(object):
         return self._security
 
     @asyncio.coroutine
+    def mongo_view(self, query, limit=None, skip=None, fields=None, auth=None):
+    	#queryJSON = json.dumps(query)
+    	resp = yield from self.resource.post('_find', auth=auth, data=query)
+    	yield from resp.maybe_raise_error()
+    	return (yield from resp.json())
+
+    @asyncio.coroutine
     def temp_view(self, map_fun,
                   red_fun=None,
                   language=None,
