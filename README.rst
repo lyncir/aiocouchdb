@@ -18,16 +18,15 @@ However, it may lack of some usability and stability bits, but
 work is in progress. Feel free to `send pull request`_ or `open issue`_ if
 you'd found something that should be fixed.
 
-**Feature**
-AIOCouchDb now supports a create_doc() method that can be called on a database instance, which takes in a JSON or JSON string, and additional optional parameters.
+**Features**
+
+aiocouchdb now supports a create_doc() method that can be called on a database instance, which takes in a JSON or JSON string, and additional optional parameters.
 
 - Modern CouchDB client for Python 3.3+ based on `aiohttp`_
 - Complete CouchDB API support (JSON and Multipart) up to 1.6.1 version
 - Multiuser workflow with Basic Auth, Cookie, Proxy and OAuth support
 - Stateless behavior
 - Stream-like handling views, changes feeds and bulk docs upload
-
-Requirements
 
 Requirements
 ============
