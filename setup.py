@@ -62,7 +62,7 @@ setup(
     zip_safe=False,
 
     install_requires=[
-        'aiohttp==2.2.5'
+        'aiohttp==2.3.9'
     ],
     extras_require={
         'oauth': [
