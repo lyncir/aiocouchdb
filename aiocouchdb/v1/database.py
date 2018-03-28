@@ -291,11 +291,22 @@ class Database(object):
         yield from resp.maybe_raise_error()
         return (yield from resp.json())
 
+
+    @asyncio.coroutine
+    def create_mango_index(self, data, *, auth=None):
+        """Adds a mango index
+		:param dict data: The document to be passed.
+        :param auth: :class:`aiocouchdb.authn.AuthProvider` instance
+		"""
+        headers = {'Content-Type': 'application/json'}
+        resp = yield from self.resource.post('_index', auth=auth, data=data, headers=headers)
+        return resp
+
     @asyncio.coroutine
     def create_doc(self, data, *, auth=None):
         """Creates a new document in the database given a JSON or JSON string.
         
-        :param JSON data: The new document to be passed.  Can also be a JSON string
+        :param dict data: The new document to be passed.  Can also be a JSON string
         :param auth: :class:`aiocouchdb.authn.AuthProvider` instance
         """
         if type(data) == str:
