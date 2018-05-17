@@ -126,7 +126,8 @@ def request(method, url, *,
 
         conn = yield from connector.connect(req)
         try:
-            resp = req.send(conn)
+            resp = yield from req.send(conn)
+            #print(resp)
             try:
                 yield from resp.start(conn, read_until_eof)
             except:
@@ -226,34 +227,34 @@ class HttpResponse(aiohttp.client.ClientResponse):
         greater or equal `400`."""
         return maybe_raise_error(self)
 
-    @asyncio.coroutine
-    def read(self):
-        """Read response payload."""
-        if self._content is None:
-            data = bytearray()
-            try:
-                while not self.content.at_eof():
-                    data.extend((yield from self.content.read()))
-            except:
-                self.close(True)
-                raise
-            else:
-                self.close()
+    #@asyncio.coroutine
+    #def read(self):
+    #    """Read response payload."""
+    #    if self._body is None:
+    #        data = bytearray()
+    #        try:
+    #            while not self._body.at_eof():
+    #                data.extend((yield from self._body.read()))
+    #        except:
+    #            self.close(True)
+    #            raise
+    #        else:
+    #            self.close()
+#
+    #        self._body = data
+#
+    #    return self._body
 
-            self._content = data
-
-        return self._content
-
-    @asyncio.coroutine
-    def json(self, *, encoding='utf-8', loads=json.loads):
-        """Reads and decodes JSON response."""
-        if self._content is None:
-            yield from self.read()
-
-        if not self._content.strip():
-            return None
-
-        return loads(self._content.decode(encoding))
+    #@asyncio.coroutine
+    #def json(self, *, encoding='utf-8', loads=json.loads):
+    #    """Reads and decodes JSON response."""
+    #    if self._body is None:
+    #        yield from self.read()
+#
+    #    if not self._body.strip():
+    #        return None
+#
+    #    return loads(self._body.decode(encoding))
 
 
 class HttpSession(object):
@@ -272,7 +273,7 @@ class HttpSession(object):
         self._loop = loop
 
         if connector is None:
-            self.connector = aiohttp.TCPConnector(force_close=False, loop=loop)
+            self.connector = aiohttp.TCPConnector(force_close=True, loop=loop)
         else:
             self.connector = connector
 
