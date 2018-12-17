@@ -42,7 +42,7 @@ class Feed(object):
         self._resp = resp
 
         ctype = resp.headers.get(CONTENT_TYPE, '').lower()
-        params = parse_mimetype(ctype).parameters;
+        params = parse_mimetype(ctype).parameters
         self._encoding = params.get('charset', 'utf-8')  # pylint: disable=E1101
 
         asyncio.Task(self._loop(), loop=loop)
@@ -53,24 +53,22 @@ class Feed(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close(force=True if exc_type else False)
 
-    @asyncio.coroutine
-    def _loop(self):
+    async def _loop(self):
         try:
             while not self._resp.content.at_eof() and self._active:
-                chunk = yield from self._resp.content.readline()
+                chunk = await self._resp.content.readline()
                 if not chunk:
                     continue
                 if chunk == b'\n' and self._ignore_heartbeats:
                     continue
-                yield from self._queue.put(chunk)
+                await self._queue.put(chunk)
         except Exception as exc:
             self._exc = exc
             self.close(True)
         else:
             self.close()
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits the next response chunk or ``None`` is feed is empty.
 
         :rtype: bytearray
@@ -79,7 +77,7 @@ class Feed(object):
             if self._exc is not None:
                 raise self._exc from None  # pylint: disable=raising-bad-type
             return None
-        chunk = yield from self._queue.get()
+        chunk = await self._queue.get()
         if chunk is None:
             # in case of race condition, raising an error should have more
             # priority then returning stop signal
@@ -112,13 +110,12 @@ class JsonFeed(Feed):
     """As :class:`Feed`, but for chunked JSON response. Assumes that each
     received chunk is valid JSON object and decodes them before emit."""
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Decodes feed chunk with JSON before emit it.
 
         :rtype: dict
         """
-        chunk = yield from super().next()
+        chunk = await super().next()
         if chunk is not None:
             return json.loads(chunk.decode(self._encoding))
 
@@ -130,13 +127,12 @@ class ViewFeed(Feed):
     _offset = None
     _update_seq = None
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits view result row.
 
         :rtype: dict
         """
-        chunk = yield from super().next()
+        chunk = await super().next()
         if chunk is None:
             return chunk
         chunk = chunk.decode(self._encoding).strip('\r\n,')
@@ -150,11 +146,11 @@ class ViewFeed(Feed):
             event = json.loads(chunk)
             self._total_rows = event['total_rows']
             self._offset = event.get('offset')
-            return (yield from self.next())
+            return (await self.next())
         elif chunk.startswith(('{"rows"', ']')):
-            return (yield from self.next())
+            return (await self.next())
         elif not chunk:
-            return (yield from self.next())
+            return (await self.next())
         else:
             return json.loads(chunk)
 
@@ -183,15 +179,14 @@ class EventSourceFeed(Feed):
 
     _ignore_heartbeats = False
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits decoded EventSource event.
 
         :rtype: dict
         """
         lines = []
         while True:
-            chunk = (yield from super().next())
+            chunk = (await super().next())
             if chunk is None:
                 if lines:
                     break
@@ -261,19 +256,18 @@ class ChangesFeed(Feed):
 
     _last_seq = None
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits the next event from changes feed.
 
         :rtype: dict
         """
-        chunk = yield from super().next()
+        chunk = await super().next()
         if chunk is None:
             return chunk
         if chunk.startswith((b'{"results"', b'],\n')):
-            return (yield from self.next())
+            return (await self.next())
         if chunk == b',\r\n':
-            return (yield from self.next())
+            return (await self.next())
         if chunk.startswith(b'"last_seq":'):
             chunk = b'{' + chunk
         try:
@@ -283,7 +277,7 @@ class ChangesFeed(Feed):
             raise
         if 'last_seq' in event:
             self._last_seq = event['last_seq']
-            return (yield from self.next())
+            return (await self.next())
         self._last_seq = event['seq']
         return event
 
@@ -303,18 +297,17 @@ class LongPollChangesFeed(ChangesFeed):
 class ContinuousChangesFeed(ChangesFeed, JsonFeed):
     """Processes continuous database changes feed."""
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits the next event from changes feed.
 
         :rtype: dict
         """
-        event = yield from JsonFeed.next(self)
+        event = await JsonFeed.next(self)
         if event is None:
             return None
         if 'last_seq' in event:
             self._last_seq = event['last_seq']
-            return (yield from self.next())
+            return (await self.next())
         self._last_seq = event['seq']
         return event
 
@@ -325,17 +318,16 @@ class EventSourceChangesFeed(ChangesFeed, EventSourceFeed):
     and emits events in the same format as others :class:`ChangesFeed` does.
     """
 
-    @asyncio.coroutine
-    def next(self):
+    async def next(self):
         """Emits the next event from changes feed.
 
         :rtype: dict
         """
-        event = (yield from EventSourceFeed.next(self))
+        event = (await EventSourceFeed.next(self))
         if event is None:
             return event
         if event.get('event') == 'heartbeat':
-            return (yield from self.next())
+            return (await self.next())
         if 'id' in event:
             self._last_seq = int(event['id'])
         return event['data']

@@ -7,7 +7,6 @@
 # you should have received as part of this distribution.
 #
 
-import asyncio
 import json
 from .feeds import ViewFeed
 
@@ -23,12 +22,11 @@ class View(object):
     def __init__(self, resource):
         self.resource = resource
 
-    @asyncio.coroutine
-    def request(self, *,
-                auth=None,
-                feed_buffer_size=None,
-                data=None,
-                params=None):
+    async def request(self, *,
+                      auth=None,
+                      feed_buffer_size=None,
+                      data=None,
+                      params=None):
         """Requests a view associated with the owned resource.
 
         :param auth: :class:`aiocouchdb.authn.AuthProvider` instance
@@ -47,8 +45,8 @@ class View(object):
         else:
             request = self.resource.get
 
-        resp = yield from request(auth=auth, data=data, params=params)
-        yield from resp.maybe_raise_error()
+        resp = await request(auth=auth, data=data, params=params)
+        await resp.maybe_raise_error()
         return ViewFeed(resp, buffer_size=feed_buffer_size)
 
     @staticmethod

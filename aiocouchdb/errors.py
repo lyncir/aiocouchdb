@@ -29,7 +29,6 @@ Exception hierarchy
 """
 
 
-import asyncio
 import aiohttp
 
 
@@ -130,14 +129,13 @@ HTTP_ERROR_BY_CODE = {
 }
 
 
-@asyncio.coroutine
-def maybe_raise_error(resp):
+async def maybe_raise_error(resp):
     """Raises :exc:`aiohttp.errors.HttpErrorException` exception in case of
     ``>=400`` response status code."""
     if resp.status < 400:
         return
     exc_cls = HTTP_ERROR_BY_CODE[resp.status]
-    data = yield from resp.json()
+    data = await resp.json()
     if isinstance(data, dict):
         error, reason = data.get('error', ''), data.get('reason', '')
         exc = exc_cls(error, reason, resp.headers)

@@ -21,6 +21,8 @@ from collections import deque, defaultdict
 
 import aiocouchdb.client
 import aiocouchdb.errors
+from yarl import URL
+from aiohttp.helpers import TimerNoop
 from aiocouchdb.client import urljoin, extract_credentials
 
 
@@ -92,7 +94,7 @@ class TestCase(unittest.TestCase, metaclass=MetaAioTestCase):
     def _request_tracer(self, f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            current_task = asyncio.Task.current_task(loop=self.loop)
+            current_task = asyncio.current_task(loop=self.loop)
             self._req_per_task[current_task].append((args, kwargs))
             return f(*args, **kwargs)
         return wrapper
@@ -127,10 +129,16 @@ class TestCase(unittest.TestCase, metaclass=MetaAioTestCase):
             chunks_queue = deque([data])
             lines_queue = deque(data.splitlines(keepends=True))
 
-        resp = aiocouchdb.client.HttpResponse('', '')
-        resp._post_init(self.loop)
+        resp = aiocouchdb.client.HttpResponse('', URL(''),
+                                              request_info=mock.Mock(),
+                                              writer=mock.Mock(),
+                                              continue100=None,
+                                              timer=TimerNoop(),
+                                              traces=[],
+                                              loop=self.loop,
+                                              session=mock.Mock)
         resp.status = status
-        resp.headers = headers
+        resp._headers = headers
         resp.cookies = cookies
         resp.content = unittest.mock.Mock()
         resp.content._buffer = bytearray()
@@ -167,7 +175,7 @@ class TestCase(unittest.TestCase, metaclass=MetaAioTestCase):
     def assert_request_called_with(self, method, *path, **kwargs):
         self.assertTrue(self.request.called and self.request.call_count >= 1)
 
-        current_task = asyncio.Task.current_task(loop=self.loop)
+        current_task = asyncio.current_task(loop=self.loop)
         if current_task in self._req_per_task:
             call_args, call_kwargs = self._req_per_task[current_task][-1]
         else:

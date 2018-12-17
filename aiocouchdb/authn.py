@@ -8,7 +8,6 @@
 #
 
 import abc
-import asyncio
 import base64
 import functools
 import hashlib
@@ -91,11 +90,10 @@ class AuthProvider(object, metaclass=abc.ABCMeta):
         """Wraps request coroutine function to apply the authentication context.
         """
         @functools.wraps(request_func)
-        @asyncio.coroutine
-        def wrapper(method, url, headers, **kwargs):
+        async def wrapper(method, url, headers, **kwargs):
             self.apply(url, headers)
-            response = yield from request_func(method, url,
-                                               headers=headers, **kwargs)
+            response = await request_func(method, url,
+                                          headers=headers, **kwargs)
             self.update(response)
             return response
         return wrapper

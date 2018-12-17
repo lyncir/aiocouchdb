@@ -25,8 +25,6 @@ from .hdrs import (
     CONTENT_TYPE,
     LOCATION,
     METH_GET,
-    SEC_WEBSOCKET_KEY1,
-    TRANSFER_ENCODING,
     URI,
 )
 from .multipart import MultipartWriter
@@ -44,7 +42,7 @@ __all__ = (
 
 # FIXME: workaround of decompressing empty payload.
 # https://github.com/KeepSafe/aiohttp/pull/154
-#class HttpPayloadParser(aiohttp.HttpPayloadParser):
+# class HttpPayloadParser(aiohttp.HttpPayloadParser):
 #
 #    def __call__(self, out, buf):
 #        # payload params
@@ -85,26 +83,25 @@ __all__ = (
 #
 #        out.feed_eof()
 #
-#aiohttp.HttpPayloadParser = HttpPayloadParser
+# aiohttp.HttpPayloadParser = HttpPayloadParser
 
 
-@asyncio.coroutine
-def request(method, url, *,
-            allow_redirects=True,
-            compress=None,
-            connector=None,
-            cookies=None,
-            data=None,
-            encoding='utf-8',
-            expect100=False,
-            headers=None,
-            loop=None,
-            max_redirects=10,
-            params=None,
-            read_until_eof=True,
-            request_class=None,
-            response_class=None,
-            version=aiohttp.HttpVersion11):
+async def request(method, url, *,
+                  allow_redirects=True,
+                  compress=None,
+                  connector=None,
+                  cookies=None,
+                  data=None,
+                  encoding='utf-8',
+                  expect100=False,
+                  headers=None,
+                  loop=None,
+                  max_redirects=10,
+                  params=None,
+                  read_until_eof=True,
+                  request_class=None,
+                  response_class=None,
+                  version=aiohttp.HttpVersion11):
 
     redirects = 0
     method = method.upper()
@@ -124,12 +121,12 @@ def request(method, url, *,
                             response_class=response_class,
                             version=version)
 
-        conn = yield from connector.connect(req)
+        conn = await connector.connect(req)
         try:
-            resp = yield from req.send(conn)
-            #print(resp)
+            resp = await req.send(conn)
+            # print(resp)
             try:
-                yield from resp.start(conn, read_until_eof)
+                await resp.start(conn, read_until_eof)
             except:
                 resp.close()
                 conn.close()
@@ -153,8 +150,7 @@ def request(method, url, *,
                 method = METH_GET
                 data = None
 
-            r_url = (resp.headers.get(LOCATION) or
-                     resp.headers.get(URI))
+            r_url = (resp.headers.get(LOCATION) or resp.headers.get(URI))
 
             scheme = urllib.parse.urlsplit(r_url)[0]
             if scheme not in ('http', 'https', ''):
@@ -165,7 +161,7 @@ def request(method, url, *,
 
             url = urllib.parse.urldefrag(r_url)[0]
             if url:
-                yield from asyncio.async(resp.release(), loop=loop)
+                await asyncio.ensure_future(resp.release(), loop=loop)
                 continue
 
         break
@@ -227,34 +223,34 @@ class HttpResponse(aiohttp.client.ClientResponse):
         greater or equal `400`."""
         return maybe_raise_error(self)
 
-    #@asyncio.coroutine
-    #def read(self):
-    #    """Read response payload."""
-    #    if self._body is None:
-    #        data = bytearray()
-    #        try:
-    #            while not self._body.at_eof():
-    #                data.extend((yield from self._body.read()))
-    #        except:
-    #            self.close(True)
-    #            raise
-    #        else:
-    #            self.close()
-#
-    #        self._body = data
-#
-    #    return self._body
+    # @asyncio.coroutine
+    # def read(self):
+    #     """Read response payload."""
+    #     if self._body is None:
+    #         data = bytearray()
+    #         try:
+    #             while not self._body.at_eof():
+    #                 data.extend((yield from self._body.read()))
+    #         except:
+    #             self.close(True)
+    #             raise
+    #         else:
+    #             self.close()
 
-    #@asyncio.coroutine
-    #def json(self, *, encoding='utf-8', loads=json.loads):
-    #    """Reads and decodes JSON response."""
-    #    if self._body is None:
-    #        yield from self.read()
-#
-    #    if not self._body.strip():
-    #        return None
-#
-    #    return loads(self._body.decode(encoding))
+    #         self._body = data
+
+    #     return self._body
+
+    # @asyncio.coroutine
+    # def json(self, *, encoding='utf-8', loads=json.loads):
+    #     """Reads and decodes JSON response."""
+    #     if self._body is None:
+    #         yield from self.read()
+
+    #     if not self._body.strip():
+    #         return None
+
+    #     return loads(self._body.decode(encoding))
 
 
 class HttpSession(object):

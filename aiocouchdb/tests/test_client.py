@@ -14,6 +14,8 @@ import unittest.mock as mock
 import aiocouchdb.authn
 import aiocouchdb.client
 
+from yarl import URL
+
 from . import utils
 
 
@@ -112,27 +114,27 @@ class HttpRequestTestCase(utils.TestCase):
     _test_target = 'mock'
 
     def test_encode_json_body(self):
-        req = aiocouchdb.client.HttpRequest('post', self.url,
+        req = aiocouchdb.client.HttpRequest('post', URL(self.url),
                                             data={'foo': 'bar'})
         self.assertEqual(b'{"foo": "bar"}', req.body)
 
     def test_correct_encode_boolean_params(self):
-        req = aiocouchdb.client.HttpRequest('get', self.url,
+        req = aiocouchdb.client.HttpRequest('get', URL(self.url),
                                             params={'foo': True})
         self.assertEqual('/?foo=true', req.path)
 
-        req = aiocouchdb.client.HttpRequest('get', self.url,
+        req = aiocouchdb.client.HttpRequest('get', URL(self.url),
                                             params={'bar': False})
         self.assertEqual('/?bar=false', req.path)
 
     def test_encode_chunked_json_body(self):
         req = aiocouchdb.client.HttpRequest(
-            'post', self.url, data=('{"foo": "bar"}' for _ in [0]))
+            'post', URL(self.url), data=('{"foo": "bar"}' for _ in [0]))
         self.assertIsInstance(req.body, types.GeneratorType)
 
     def test_encode_readable_object(self):
         req = aiocouchdb.client.HttpRequest(
-            'post', self.url, data=io.BytesIO(b'foobarbaz'))
+            'post', URL(self.url), data=io.BytesIO(b'foobarbaz'))
         self.assertIsInstance(req.body, io.IOBase)
 
 
